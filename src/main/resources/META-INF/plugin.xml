@@ -1,0 +1,50 @@
+<idea-plugin url="https://github.com/Lokomojo/sailfishos-clion-plugin">
+    <id>io.github.lokomojo.sailfishos-clion-plugin</id>
+    <name>Sailfish OS SDK Integration</name>
+    <vendor url="https://github.com/Lokomojo">Lokomojo</vendor>
+    <description><![CDATA[
+        <p>Develop Sailfish OS applications in CLion with the Sailfish SDK's <code>sfdk</code> tool.</p>
+        <ul>
+            <li>New Project wizard: Sailfish OS Application, created with <code>sfdk init</code> for a chosen build target and registered device.</li>
+            <li>Debug builds, release builds and clean run through sfdk and report to CLion's Build tool window, as a custom build target with a native Sailfish SDK step type.</li>
+            <li>Deploy to the device as a before-launch step, using <code>sfdk deploy --rsync</code>.</li>
+            <li>Debug on the device with CLion's Remote GDB Server configuration, created and wired up by the wizard.</li>
+            <li>Code insight from the project's compilation database, rewritten against the SDK's target sysroot.</li>
+        </ul>
+        <p>Requires the Sailfish SDK (sfdk in ~/SailfishOS/bin, or set in the wizard or under Settings | Build, Execution, Deployment | Sailfish OS SDK), a device registered with the SDK, a CLion SSH configuration for that device, and clang and clang++ on the host for indexing.</p>
+        <p>Source and issues: <a href="https://github.com/Lokomojo/sailfishos-clion-plugin">github.com/Lokomojo/sailfishos-clion-plugin</a></p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.clion</depends>
+    <depends>com.intellij.clion-compdb</depends>
+    <depends>com.intellij.nativeDebug</depends>
+    <depends>com.jetbrains.plugins.webDeployment</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.github.lokomojo.sailfishclion.settings.SailfishSdkSettings"/>
+        <projectService serviceImplementation="io.github.lokomojo.sailfishclion.project.SailfishProjectState"/>
+        <applicationConfigurable parentId="build"
+                                 instance="io.github.lokomojo.sailfishclion.settings.SailfishSdkConfigurable"
+                                 id="io.github.lokomojo.sailfishclion.settings"
+                                 displayName="Sailfish OS SDK"/>
+        <directoryProjectGenerator implementation="io.github.lokomojo.sailfishclion.wizard.SailfishProjectGenerator"/>
+        <stepsBeforeRunProvider implementation="io.github.lokomojo.sailfishclion.deploy.SailfishDeployBeforeRunTaskProvider"/>
+        <notificationGroup id="Sailfish OS" displayType="BALLOON"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="clion">
+        <externalConfigurationProvider implementation="io.github.lokomojo.sailfishclion.build.SailfishBuildStepProvider"/>
+    </extensions>
+
+    <actions>
+        <group id="io.github.lokomojo.sailfishclion.BuildGroup" class="io.github.lokomojo.sailfishclion.actions.SailfishBuildGroup" text="Sailfish OS" description="Build, clean and deploy the Sailfish OS project with sfdk" popup="true" icon="/icons/sailfish.svg">
+            <add-to-group group-id="BuildMenu" anchor="last"/>
+            <action id="io.github.lokomojo.sailfishclion.BuildDebug" class="io.github.lokomojo.sailfishclion.actions.BuildDebugAction" text="Build Project (Debug)" description="Build the Sailfish OS project with sfdk using debug compiler flags"/>
+            <action id="io.github.lokomojo.sailfishclion.BuildRelease" class="io.github.lokomojo.sailfishclion.actions.BuildReleaseAction" text="Build Project (Release)" description="Build the Sailfish OS project with sfdk using release compiler flags"/>
+            <action id="io.github.lokomojo.sailfishclion.Clean" class="io.github.lokomojo.sailfishclion.actions.CleanAction" text="Clean Project" description="Run sfdk make clean in the project"/>
+            <separator/>
+            <action id="io.github.lokomojo.sailfishclion.Deploy" class="io.github.lokomojo.sailfishclion.actions.DeployAction" text="Deploy to Device" description="Install the project into the engine and rsync it to the configured Sailfish OS device"/>
+        </group>
+    </actions>
+</idea-plugin>
